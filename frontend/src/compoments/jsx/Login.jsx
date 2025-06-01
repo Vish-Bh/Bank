@@ -1,15 +1,33 @@
 import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import fetchUserPassword from '../api/fetchUserPassword.js'
+
 
 export default function Login(props) {
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const username=props.username
+  const setUsername=props.setUsername
+ const navigate = useNavigate();
+  async function handleSubmit(e) {
+  e.preventDefault();
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    console.log("Username:", username);
-    console.log("Password:", password);
+  try {
+    const isValid = await fetchUserPassword(username, password);
+
+    if (isValid) {
+      props.setIsLoggedIn(true);   
+      navigate('/home');
+    } else {
+      alert('Incorrect password');
+    }
+
+  } catch (error) {
+    console.error('error', error);
+    alert('Something went wrong');
   }
+}
+
 
   return (
     <div className="login">
@@ -48,7 +66,7 @@ export default function Login(props) {
         <a id="passwordForgot" href="#">Forgot password?</a>
 
         <button type="submit">Login</button>
-        <button type="button" onClick={() => props.setstate(prev => !prev)}>
+        <button type="button" onClick={() => navigate('/res') }>
           Register
         </button>
       </form>

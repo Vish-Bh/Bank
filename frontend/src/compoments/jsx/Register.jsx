@@ -1,23 +1,50 @@
 import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 
 export default function Register(props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+ const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
-  function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(e) {
+  e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
+  if (password !== confirmPassword) {
+    alert("Passwords do not match!");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:5000/user/addUser", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: username,        
+        password: password
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(data.message); 
+      navigate('/login');
+
+      
+    } else {
+      alert(data.error);   
     }
 
-    console.log("Username:", username);
-    console.log("Password:", password);
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Something went wrong!");
   }
+}
+
 
   return (
     <div className="register">
@@ -73,7 +100,7 @@ export default function Register(props) {
         </div>
 
         <button type="submit">Register</button>
-        <button type="button" onClick={() => props.setstate(prev => !prev)}>
+        <button type="button" onClick={() => navigate('/login')}>
           Login
         </button>
       </form>

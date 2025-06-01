@@ -12,10 +12,18 @@ def addUserToDb(name , password):
     
     result = userCollection.insert_one({"name": name, "password": password})
     return True, f"User added with ID {result.inserted_id}"
+    print("User added", name)
 
 def getUserData(name):
-    user= userCollection.find_one({"name": name})
-    return (f'Name: {user['name']} Password: {user['password']} Id={user['_id']}')
+    user = userCollection.find_one({"name": name})
+    if user:
+        return {
+            "name": user['name'],
+            "password": user['password'],
+            "id": str(user['_id'])
+        }
+    else:
+        return None
 
 def getAllUser():
     users = userCollection.find()
@@ -29,12 +37,26 @@ def getAllUser():
     return result
 
 
-def updateUser(id, name, password):
+def updateUsername(id, name):
     try:
         user_id = ObjectId(id) 
         result = userCollection.update_one(
             {"_id": user_id},
-            {"$set": {"name": name, "password": password}}
+            {"$set": {"name": name}}
+        )
+        if result.matched_count > 0:
+            return "User updated successfully"
+        else:
+            return "User not found"
+    except Exception as e:
+        return f"Error: {e}"
+    
+def updateUserpassword(id, password):
+    try:
+        user_id = ObjectId(id) 
+        result = userCollection.update_one(
+            {"_id": user_id},
+            {"$set": {"password": password}}
         )
         if result.matched_count > 0:
             return "User updated successfully"
@@ -44,5 +66,8 @@ def updateUser(id, name, password):
         return f"Error: {e}"
     
 def getUserId(name):
-    user=userCollection.find_one({'name': name})
-    return(user['_id'])    
+    user = userCollection.find_one({'name': name})
+    if user:
+        return str(user['_id']) 
+    else:
+        return None 
